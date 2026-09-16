@@ -39,10 +39,11 @@ jobs:
 
           echo "----- staging files -----"
           git add -v cause_lists_combined_2017_Jan_to_2026_July_MASTER.cache.parquet \
-                     phc_benches_combined.parquet \
                      downloads/ \
                      phc_parser_errors.log \
-                     bench_parser_errors.log
+                     scripts/phc_benches_combined.parquet \
+                     scripts/downloads/ \
+                     scripts/bench_parser_errors.log
 
           echo "----- git status after add -----"
           git status
