@@ -1,0 +1,56 @@
+name: Daily PHC Causelist Update
+
+on:
+  schedule:
+    - cron: "30 16 * * *"   # ~9:30 PM PKT daily — adjust as needed
+  workflow_dispatch:
+
+jobs:
+  scrape-and-update:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install pandas pyarrow requests beautifulsoup4 pdfplumber streamlit
+
+      - name: Run scraper + parser + parquet update
+        run: python scripts/scrape_and_update.py
+
+      - name: Scrape additional benches (Abbottabad, Mingora, Bannu, D.I.Khan)
+        run: python scripts/scrape_benches.py
+
+      - name: Commit and push if changed
+        run: |
+          git config user.name "phc-bot"
+          git config user.email "actions@github.com"
+
+          echo "----- git status before add -----"
+          git status
+
+          echo "----- staging files -----"
+          git add -v cause_lists_combined_2017_Jan_to_2026_July_MASTER.cache.parquet \
+                     downloads/ \
+                     phc_parser_errors.log \
+                     scripts/phc_benches_combined.parquet \
+                     scripts/downloads/ \
+                     scripts/bench_parser_errors.log
+
+          echo "----- git status after add -----"
+          git status
+
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "Daily causelist update $(date -u +'%Y-%m-%d')"
+            git push
+          fi

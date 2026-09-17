@@ -1,0 +1,6 @@
+venv311/ 
+__pycache__/ 
+*.pyc 
+~$* 
+logs-*.txt 
+"cause_lists_combined_2017_Jan_to_2026_July_MASTER.xlsx" 
